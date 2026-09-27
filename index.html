@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>北投水色冒險 - 高中游泳社迎新定向闖關</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts: Inter & Noto Sans TC -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;800;900&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ocean: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              300: '#7dd3fc',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              900: '#0c4a6e',
+            },
+            aqua: {
+              400: '#2dd4bf',
+              500: '#14b8a6',
+              600: '#0d9488',
+            }
+          },
+          fontFamily: {
+            sans: ['Noto Sans TC', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar & Animations */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #38bdf8; border-radius: 4px; }
+    
+    @keyframes waveFloat {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-8px) rotate(1deg); }
+    }
+    .animate-wave { animation: waveFloat 4s ease-in-out infinite; }
+
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.8; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.03); }
+    }
+    .animate-pulse-glow { animation: pulseGlow 2s infinite; }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(224, 242, 254, 0.8);
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-cyan-900 via-sky-900 to-slate-900 min-h-screen font-sans text-slate-800 pb-20 select-none">
+
+  <!-- Top Navigation Header -->
+  <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-cyan-500/30 text-white px-4 py-3 shadow-lg">
+    <div class="max-w-md mx-auto flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <div class="bg-gradient-to-tr from-cyan-400 to-blue-500 p-2 rounded-xl text-slate-900 shadow-md">
+          <i class="fa-solid font-black fa-person-swimming text-lg"></i>
+        </div>
+        <div>
+          <h1 class="font-extrabold text-base tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-cyan-300 to-sky-100">北投水色冒險</h1>
+          <p class="text-[10px] text-cyan-300/80 tracking-wider">游泳社迎新定向闖關</p>
+        </div>
+      </div>
+
+      <!-- Quick Timer & Sound Button -->
+      <div class="flex items-center space-x-2">
+        <div id="header-timer" class="hidden bg-slate-800 border border-cyan-500/40 px-2.5 py-1 rounded-lg text-xs font-mono text-cyan-300 font-bold">
+          00:00:00
+        </div>
+        <button id="audio-toggle-btn" onclick="toggleAudio()" class="w-8 h-8 rounded-lg bg-slate-800 border border-cyan-500/40 flex items-center justify-center text-cyan-300 hover:text-white transition">
+          <i class="fa-solid fa-volume-high text-xs"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Application Container -->
+  <main class="max-w-md mx-auto px-4 pt-4">
+
+    <!-- Tab Buttons -->
+    <nav class="grid grid-cols-4 gap-1.5 bg-slate-800/80 p-1.5 rounded-2xl border border-cyan-500/20 mb-4 shadow-xl">
+      <button onclick="switchTab('game')" id="tab-game" class="tab-btn active text-xs font-bold py-2 rounded-xl transition-all flex flex-col items-center justify-center space-y-1 bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md">
+        <i class="fa-solid fa-flag-checkered text-sm"></i>
+        <span>闖關任務</span>
+      </button>
+      <button onclick="switchTab('map')" id="tab-map" class="tab-btn text-xs font-bold py-2 rounded-xl transition-all text-cyan-200/70 hover:text-white flex flex-col items-center justify-center space-y-1">
+        <i class="fa-solid fa-map-location-dot text-sm"></i>
+        <span>地圖指引</span>
+      </button>
+      <button onclick="switchTab('rules')" id="tab-rules" class="tab-btn text-xs font-bold py-2 rounded-xl transition-all text-cyan-200/70 hover:text-white flex flex-col items-center justify-center space-y-1">
+        <i class="fa-solid fa-shield-halved text-sm"></i>
+        <span>規則與求救</span>
+      </button>
+      <button onclick="switchTab('leaderboard')" id="tab-leaderboard" class="tab-btn text-xs font-bold py-2 rounded-xl transition-all text-cyan-200/70 hover:text-white flex flex-col items-center justify-center space-y-1">
+        <i class="fa-solid fa-trophy text-sm"></i>
+        <span>排行榜/設定</span>
+      </button>
+    </nav>
+
+    <!-- SECTION 1: GAME TAB -->
+    <section id="section-game" class="space-y-4">
+
+      <!-- Registration Form (Shown if not started) -->
+      <div id="registration-card" class="glass-card rounded-3xl p-6 shadow-2xl relative overflow-hidden">
+        <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-cyan-400/20 rounded-full blur-2xl"></div>
+        
+        <div class="text-center mb-6">
+          <div class="inline-flex p-3 bg-cyan-100 rounded-2xl text-cyan-600 mb-3 animate-wave">
+            <i class="fa-solid fa-compass-drafting text-3xl"></i>
+          </div>
+          <h2 class="text-xl font-black text-slate-900">隊伍登記與起跑準備</h2>
+          <p class="text-xs text-slate-500 mt-1">時間限時 3 小時，請填寫完整資訊以啟動計時</p>
+        </div>
+
+        <form id="setup-form" onsubmit="startGame(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">
+              <i class="fa-solid fa-users text-cyan-600 mr-1"></i>小組名稱 (小隊代號)
+            </label>
+            <input type="text" id="team-name" required placeholder="例如：自由式霸主隊" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500 focus:outline-none text-sm bg-white/80">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">
+              <i class="fa-solid fa-user-shield text-cyan-600 mr-1"></i>隊長姓名與電話
+            </label>
+            <input type="text" id="captain-info" required placeholder="例如：陳大雄 0912-345678" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500 focus:outline-none text-sm bg-white/80">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">
+              <i class="fa-solid fa-people-group text-cyan-600 mr-1"></i>隊員名單 (3-5人)
+            </label>
+            <textarea id="members-info" rows="2" required placeholder="請填寫所有組員姓名，用逗號分隔..." class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500 focus:outline-none text-sm bg-white/80"></textarea>
+          </div>
+
+          <button type="submit" class="w-full py-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-extrabold rounded-2xl shadow-lg shadow-cyan-500/30 transform active:scale-95 transition flex items-center justify-center space-x-2 text-base">
+            <i class="fa-solid fa-stopwatch"></i>
+            <span>開啟闖關任務 & 啟動計時</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Active Game View (Hidden by default until registration) -->
+      <div id="active-game-card" class="hidden space-y-4">
+        
+        <!-- Overall Progress Stepper -->
+        <div class="glass-card rounded-2xl p-4 shadow-lg">
+          <div class="flex justify-between items-center mb-2">
+            <div class="text-xs font-bold text-slate-600 flex items-center space-x-1">
+              <span id="display-team-name" class="text-cyan-700 font-extrabold"></span>
+              <span class="text-slate-300">|</span>
+              <span>進度：<strong id="stage-num-text" class="text-blue-600">1</strong>/8 關</span>
+            </div>
+            <span id="penalty-badge" class="hidden bg-amber-100 border border-amber-300 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full">
+              罰時 +<span id="penalty-minutes">0</span>分鐘
+            </span>
+          </div>
+
+          <!-- Progress Dots -->
+          <div id="progress-dots" class="grid grid-cols-8 gap-1 py-1">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Current Stage Main Card -->
+        <div class="glass-card rounded-3xl p-5 shadow-2xl relative">
+          
+          <!-- Location Banner Header -->
+          <div class="relative rounded-2xl overflow-hidden mb-4 bg-gradient-to-br from-cyan-600 to-blue-800 text-white p-4 min-h-[120px] flex flex-col justify-between shadow-inner">
+            <div class="absolute right-0 top-0 opacity-15 translate-x-4 -translate-y-4">
+              <i id="stage-bg-icon" class="fa-solid fa-water text-9xl"></i>
+            </div>
+            <div>
+              <span id="stage-tag" class="bg-white/20 backdrop-blur-md text-cyan-100 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
+                STAGE 1
+              </span>
+              <h3 id="stage-title" class="text-xl font-black mt-1 text-white tracking-wide">
+                新北投車站
+              </h3>
+              <p id="stage-subtitle" class="text-xs text-cyan-200 mt-0.5 font-medium">
+                游泳精神：啟航與默契
+              </p>
+            </div>
+            <div class="flex items-center space-x-2 text-[11px] text-cyan-100 font-semibold mt-2">
+              <i class="fa-solid fa-location-dot text-amber-300"></i>
+              <span id="stage-address">台北市北投區七星街1號</span>
+            </div>
+          </div>
+
+          <!-- Physical Team Task Box -->
+          <div class="bg-amber-50/80 border border-amber-200 rounded-2xl p-3.5 mb-4 shadow-sm">
+            <div class="flex items-center space-x-2 text-amber-900 font-bold text-xs mb-1.5">
+              <i class="fa-solid fa-camera-retro text-amber-600 text-sm"></i>
+              <span>現場實體默契任務</span>
+            </div>
+            <p id="stage-physical-task" class="text-xs text-amber-950 leading-relaxed font-medium">
+              載入中...
+            </p>
+          </div>
+
+          <!-- Digital Web Puzzle Section -->
+          <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 mb-4">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-black text-slate-800 flex items-center">
+                <i class="fa-solid fa-key text-cyan-600 mr-1.5"></i>關卡解密線上挑戰
+              </span>
+              <span class="text-[10px] text-slate-400 font-mono">CODE PUZZLE</span>
+            </div>
+
+            <p id="stage-puzzle-desc" class="text-xs text-slate-600 mb-3 leading-relaxed">
+              載入中...
+            </p>
+
+            <!-- Interactive Component Area (Dynamic for Mini-games) -->
+            <div id="puzzle-interactive-area" class="mb-3">
+              <!-- Rendered via JS based on stage type -->
+            </div>
+
+            <!-- Standard Code Input Form -->
+            <div class="flex space-x-2">
+              <input type="text" id="puzzle-answer-input" placeholder="輸入解密密碼..." class="flex-1 px-3 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-cyan-500 focus:outline-none text-sm bg-white font-mono uppercase">
+              <button onclick="submitStageAnswer()" class="px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold text-xs rounded-xl shadow-md active:scale-95 transition">
+                驗證答案
+              </button>
+            </div>
+          </div>
+
+          <!-- Hint System -->
+          <div class="flex justify-between items-center text-xs">
+            <button onclick="toggleHintModal()" class="text-slate-500 hover:text-cyan-700 flex items-center space-x-1 font-semibold">
+              <i class="fa-regular fa-lightbulb text-amber-500"></i>
+              <span>看關卡提示 (加罰5分鐘)</span>
+            </button>
+            <button onclick="skipStageModal()" class="text-slate-400 hover:text-rose-600 text-[11px] underline">
+              關卡卡住求助關主
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+
+    <!-- SECTION 2: MAP TAB -->
+    <section id="section-map" class="hidden space-y-4">
+      <div class="glass-card rounded-3xl p-5 shadow-xl">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <h2 class="text-lg font-black text-slate-900">北投闖關路線地圖指南</h2>
+            <p class="text-xs text-slate-500">8 大景點總打卡路線圖與參考距離</p>
+          </div>
+          <a href="https://www.google.com/maps/search/%E5%8C%97%E6%8A%95%E6%BA%AB%E6%B3%89%E5%8D%9A%E7%89%A9%E9%A4%A8" target="_blank" class="px-3 py-1.5 bg-cyan-100 text-cyan-800 text-xs font-bold rounded-xl hover:bg-cyan-200 transition flex items-center space-x-1">
+            <i class="fa-solid fa-up-right-from-square text-[10px]"></i>
+            <span>Google地圖</span>
+          </a>
+        </div>
+
+        <!-- Simulated Visual Map Route -->
+        <div class="bg-gradient-to-b from-sky-100 via-emerald-50 to-amber-50 rounded-2xl p-4 border border-cyan-200 mb-4 relative overflow-hidden">
+          <div class="absolute top-2 right-2 text-[10px] bg-white/80 px-2 py-0.5 rounded-full text-slate-500 border">
+            全長約 2.5 公里
+          </div>
+
+          <div class="space-y-3 relative z-10" id="map-route-list">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+
+        <div class="bg-slate-100 rounded-xl p-3 text-xs text-slate-600 leading-relaxed">
+          <i class="fa-solid fa-circle-info text-cyan-600 mr-1"></i>
+          <strong>定向提醒：</strong>所有景點均步行可達。請注意人行道安全，並隨時補充水分預防中暑。
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: RULES & SAFETY TAB -->
+    <section id="section-rules" class="hidden space-y-4">
+      <div class="glass-card rounded-3xl p-5 shadow-xl">
+        <h2 class="text-lg font-black text-slate-900 mb-2">迎新活動規則與安全須知</h2>
+        
+        <div class="space-y-3 text-xs text-slate-700">
+          <div class="p-3 bg-cyan-50 rounded-2xl border border-cyan-200">
+            <h3 class="font-bold text-cyan-900 mb-1 flex items-center">
+              <i class="fa-solid fa-clock text-cyan-600 mr-1.5"></i>時限與計分
+            </h3>
+            <p class="leading-relaxed">活動總時間限時 <strong>3 小時</strong>。最終成績計算公式為：<br><code>實際耗時 + 提示罰時(每點5分) - 闖關默契加分</code>。</p>
+          </div>
+
+          <div class="p-3 bg-amber-50 rounded-2xl border border-amber-200">
+            <h3 class="font-bold text-amber-900 mb-1 flex items-center">
+              <i class="fa-solid fa-triangle-exclamation text-amber-600 mr-1.5"></i>安全注意事項
+            </h3>
+            <ul class="list-disc list-inside space-y-1 text-amber-950">
+              <li>切勿在走道或溫泉區周邊奔跑。</li>
+              <li>地熱谷區域高溫，禁止跨越欄桿或觸碰高溫水流。</li>
+              <li>若體溫過高或感覺頭暈，請立即至陰涼處休息並通知工作人員。</li>
+            </ul>
+          </div>
+
+          <div class="p-3 bg-slate-100 rounded-2xl">
+            <h3 class="font-bold text-slate-900 mb-2 flex items-center">
+              <i class="fa-solid fa-phone-volume text-rose-600 mr-1.5"></i>緊急聯絡電話（幹部群）
+            </h3>
+            <div class="grid grid-cols-2 gap-2 text-center">
+              <a href="tel:0912345678" class="p-2 bg-white rounded-xl border font-bold text-slate-800 hover:bg-slate-50">
+                <div class="text-[10px] text-slate-400">社長 大熊</div>
+                <div class="text-cyan-600">0912-345-678</div>
+              </a>
+              <a href="tel:0987654321" class="p-2 bg-white rounded-xl border font-bold text-slate-800 hover:bg-slate-50">
+                <div class="text-[10px] text-slate-400">副社 小婷</div>
+                <div class="text-cyan-600">0987-654-321</div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: LEADERBOARD & CONFIG TAB -->
+    <section id="section-leaderboard" class="hidden space-y-4">
+      
+      <!-- Leaderboard Card -->
+      <div class="glass-card rounded-3xl p-5 shadow-xl">
+        <div class="flex justify-between items-center mb-3">
+          <h2 class="text-lg font-black text-slate-900">隊伍闖關排行榜 (本機)</h2>
+          <button onclick="exportDataJSON()" class="px-2.5 py-1 bg-slate-200 hover:bg-slate-300 rounded-lg text-[11px] font-bold text-slate-700">
+            <i class="fa-solid fa-download mr-1"></i>匯出 JSON
+          </button>
+        </div>
+        
+        <div id="leaderboard-list" class="space-y-2 text-xs">
+          <!-- Populated via JS -->
+        </div>
+      </div>
+
+      <!-- Admin Google Form Config -->
+      <div class="glass-card rounded-3xl p-5 shadow-xl">
+        <h2 class="text-sm font-black text-slate-900 mb-1">
+          <i class="fa-brands fa-google text-emerald-600 mr-1"></i>Google 表單串接設定 (幹部用)
+        </h2>
+        <p class="text-[11px] text-slate-500 mb-3">若需要自動上傳結果至 Google Sheet，請貼上表單發送網址與欄位名稱。</p>
+
+        <div class="space-y-3 text-xs">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 mb-0.5">Google Form Action URL</label>
+            <input type="text" id="gform-url" placeholder="https://docs.google.com/forms/d/e/.../formResponse" class="w-full px-3 py-2 rounded-xl border text-xs bg-white font-mono">
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[10px] font-bold text-slate-700 mb-0.5">小隊名稱 Entry ID</label>
+              <input type="text" id="gform-entry-team" placeholder="entry.123456" class="w-full px-2.5 py-1.5 rounded-lg border text-xs font-mono">
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-slate-700 mb-0.5">總時間 Entry ID</label>
+              <input type="text" id="gform-entry-time" placeholder="entry.987654" class="w-full px-2.5 py-1.5 rounded-lg border text-xs font-mono">
+            </div>
+          </div>
+          <button onclick="saveGFormConfig()" class="w-full py-2 bg-slate-800 text-white font-bold rounded-xl text-xs hover:bg-slate-900">
+            儲存 Google 表單設定
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL 1: HINT MODAL -->
+  <div id="hint-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-5 shadow-2xl space-y-4">
+      <div class="flex justify-between items-center border-b pb-2">
+        <h3 class="font-bold text-slate-900 text-sm flex items-center">
+          <i class="fa-solid fa-lightbulb text-amber-500 mr-1.5"></i>關卡提示解鎖
+        </h3>
+        <button onclick="toggleHintModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <p class="text-xs text-slate-600 leading-relaxed">
+        確定要解鎖本關提示嗎？使用提示將在最終總時間增加 <strong class="text-amber-600">5 分鐘</strong> 罰時。
+      </p>
+      <div id="hint-content" class="hidden p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 font-medium">
+        <!-- Rendered hint text -->
+      </div>
+      <div class="flex space-x-2">
+        <button onclick="confirmUnlockHint()" id="btn-unlock-hint" class="flex-1 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl text-xs">
+          確認解鎖 (+5分鐘)
+        </button>
+        <button onclick="toggleHintModal()" class="px-4 py-2.5 bg-slate-100 text-slate-700 font-bold rounded-xl text-xs">
+          關閉
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: VICTORY SCORECARD MODAL -->
+  <div id="victory-modal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-gradient-to-b from-cyan-500 to-blue-700 rounded-3xl max-w-sm w-full p-6 text-white text-center shadow-2xl relative my-auto">
+      <div class="absolute -top-10 left-1/2 -translate-x-1/2 w-20 h-20 bg-amber-400 rounded-full border-4 border-white flex items-center justify-center text-slate-900 text-3xl shadow-lg">
+        <i class="fa-solid fa-trophy"></i>
+      </div>
+
+      <div class="pt-8 mb-4">
+        <span class="bg-white/20 text-cyan-100 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">
+          MISSION COMPLETED
+        </span>
+        <h2 class="text-2xl font-black mt-2">恭喜完成北投定向闖關！</h2>
+        <p class="text-xs text-cyan-100 mt-1">高中游泳社迎新大成功 🏊‍♂️</p>
+      </div>
+
+      <!-- Summary Stats Card -->
+      <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 text-left space-y-2 mb-4 text-xs border border-white/20">
+        <div class="flex justify-between border-b border-white/10 pb-1.5">
+          <span class="text-cyan-200">隊伍名稱：</span>
+          <strong id="res-team-name" class="font-extrabold"></strong>
+        </div>
+        <div class="flex justify-between border-b border-white/10 pb-1.5">
+          <span class="text-cyan-200">闖關耗時：</span>
+          <strong id="res-elapsed-time" class="font-mono"></strong>
+        </div>
+        <div class="flex justify-between border-b border-white/10 pb-1.5">
+          <span class="text-cyan-200">提示罰時：</span>
+          <strong id="res-penalty-time" class="text-amber-300 font-mono"></strong>
+        </div>
+        <div class="flex justify-between text-sm pt-1">
+          <span class="text-cyan-100 font-bold">總採計時間：</span>
+          <strong id="res-final-time" class="text-amber-300 font-black font-mono"></strong>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="space-y-2">
+        <button onclick="submitResultsToGoogleForm()" id="btn-submit-gform" class="w-full py-3.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black rounded-xl shadow-lg transition active:scale-95 flex items-center justify-center space-x-2">
+          <i class="fa-solid fa-paper-plane"></i>
+          <span>自動回傳成績至大會</span>
+        </button>
+        <button onclick="restartGame()" class="w-full py-2.5 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl text-xs border border-white/20">
+          回到首頁 / 重新紀錄
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ==========================================
+       1. GAME DATA & STAGE DEFINITIONS
+       ========================================== */
+    const STAGES = [
+      {
+        id: 1,
+        title: "新北投車站",
+        subtitle: "游泳精神：啟航與默契",
+        address: "台北市北投區七星街1號",
+        icon: "fa-train-subway",
+        physicalTask: "【跳水預備姿勢合照】全組隊員需在車站古蹟建築前，排成一列拍下一張「模仿接力跳水預備姿勢」的熱血團體照！",
+        puzzleDesc: "請走近車站月台展區，尋找舊車站牌上的建置年份數字作為關卡密碼：",
+        answer: "1916",
+        hint: "請尋找站牌告示上的歷史簡介，數字為191X年。",
+        type: "input"
+      },
+      {
+        id: 2,
+        title: "七星公園",
+        subtitle: "游泳精神：陸上划水衝刺",
+        address: "七星公園大草皮",
+        icon: "fa-person-swimming",
+        physicalTask: "【陸上接力划水】隊員排成一列，利用陸上自由式高臂划水動作進行傳接小水桶或道具，完成連續10次划水。",
+        puzzleDesc: "完成上方「100m 自由式衝刺」點擊小遊戲，或輸入關主通關密碼：",
+        answer: "SWIM",
+        hint: "可以快速連續點擊「划水」按鈕達100公尺，或輸入密碼 SWIM。",
+        type: "minigame_sprint"
+      },
+      {
+        id: 3,
+        title: "北投公園",
+        subtitle: "游泳精神：水流感知",
+        address: "北投公園噴泉池週邊",
+        icon: "fa-water text-cyan-300",
+        physicalTask: "【水波倒影合照】找到公園內著名的圓形噴水池，全員圍繞噴水池比出「蛙式划手抱水」動作並合照。",
+        puzzleDesc: "此噴水池曾出現在知名電影中，請問公園告示牌寫道噴泉建於西元幾年？（或輸入「噴泉」）",
+        answer: "1911",
+        altAnswers: ["噴泉", "1911年"],
+        hint: "西元 1911 年（辛亥革命同年）。",
+        type: "input"
+      },
+      {
+        id: 4,
+        title: "新北投圖書館",
+        subtitle: "游泳精神：沉靜與節奏",
+        address: "台北市北投區光明路251號",
+        icon: "fa-book-bookmark",
+        physicalTask: "【無聲肢體暗號】圖書館內需保持安靜。請在圖書館外木棧道，不發出聲音的情況下用肢體比出「游泳四大姿勢」（自由式、仰式、蛙式、蝶式）讓關主審核。",
+        puzzleDesc: "這座木造綠建築以環保聞名。請問游泳有4大姿勢，本圖書館的綠建築標章等級獲得幾種頂級評等？（請輸入數字）",
+        answer: "4",
+        altAnswers: ["綠建築"],
+        hint: "答案是個個位數字：4。",
+        type: "input"
+      },
+      {
+        id: 5,
+        title: "北投溫泉博物館",
+        subtitle: "游泳精神：羅馬大浴場殿堂",
+        address: "台北市北投區中山路2號",
+        icon: "fa-landmark-dome",
+        physicalTask: "【彩繪玻璃擺拍】進入博物館二樓大浴場展區，找出極具特色彩繪玻璃，拍下全組與彩繪玻璃光影的合照。",
+        puzzleDesc: "請點擊下方三色玻璃磚，解開大浴場彩繪玻璃光影密碼（或輸入 ROMAN）：",
+        answer: "ROMAN",
+        hint: "可直接輸入 ROMAN 或完成玻璃點擊序。",
+        type: "minigame_color"
+      },
+      {
+        id: 6,
+        title: "地熱谷",
+        subtitle: "游泳精神：沸騰熱血與耐力",
+        address: "台北市北投區中山路30-10號",
+        icon: "fa-fire-flame-curved",
+        physicalTask: "【蒸氣包圍姿勢】在地熱谷景觀台，拍攝一張全隊被溫泉蒸氣包圍且比出「慶祝勝利」的熱血團體照。",
+        puzzleDesc: "地熱谷水溫極高，被稱為「地獄谷」。請問告示牌顯示地熱谷溫泉水溫常年約在攝氏幾度？（輸入數字，如90）",
+        answer: "90",
+        altAnswers: ["90度", "硫磺"],
+        hint: "溫度約在 80 到 100 度之間，請填 90。",
+        type: "input"
+      },
+      {
+        id: 7,
+        title: "淨水礦泉場",
+        subtitle: "游泳精神：水源巡禮",
+        address: "北投水道歷史遺址週邊",
+        icon: "fa-faucet-drip",
+        physicalTask: "【合力運水挑戰】使用關主提供的水杯，隊員間用單手傳接運水至指定刻度，滴水不漏。",
+        puzzleDesc: "請問北投乾淨良好的水質源頭標示牌關鍵字為何？（請輸入「水源」）：",
+        answer: "水源",
+        hint: "直接輸入「水源」即可通關。",
+        type: "input"
+      },
+      {
+        id: 8,
+        title: "水都溫泉會館 (終點)",
+        subtitle: "游泳精神：凱旋與迎新晚會",
+        address: "台北市北投區光明路283號",
+        icon: "fa-trophy",
+        physicalTask: "【終點溫泉蛋體驗 / 歡慶隊呼】全組到達終點，向關主大聲喊出游泳社迎新隊呼，並拍下終點大合照！",
+        puzzleDesc: "請向終點總關主領取終極通關金鑰金牌密碼：",
+        answer: "2026",
+        altAnswers: ["WINNER", "2026"],
+        hint: "請直接詢問現場終點關主密碼（預設為 2026）。",
+        type: "input"
+      }
+    ];
+
+    /* ==========================================
+       2. GLOBAL STATE & INITIALIZATION
+       ========================================== */
+    let gameState = {
+      teamName: "",
+      captainInfo: "",
+      membersInfo: "",
+      currentStage: 1,
+      startTime: null,
+      endTime: null,
+      unlockedHints: [], // Array of stage IDs where hint was used
+      completed: false,
+      sprintDistance: 0
+    };
+
+    let timerInterval = null;
+    let audioCtx = null;
+    let soundEnabled = true;
+
+    // Load saved state on startup
+    window.addEventListener('DOMContentLoaded', () => {
+      loadStateFromStorage();
+      renderMapRoute();
+      renderLeaderboard();
+      updateUI();
+    });
+
+    /* ==========================================
+       3. NAVIGATION & TAB SWITCHING
+       ========================================== */
+    function switchTab(tabName) {
+      playChime(400, 0.05);
+      const tabs = ['game', 'map', 'rules', 'leaderboard'];
+      tabs.forEach(t => {
+        const sec = document.getElementById(`section-${t}`);
+        const btn = document.getElementById(`tab-${t}`);
+        if (t === tabName) {
+          sec.classList.remove('hidden');
+          btn.className = "tab-btn active text-xs font-bold py-2 rounded-xl transition-all flex flex-col items-center justify-center space-y-1 bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md";
+        } else {
+          sec.classList.add('hidden');
+          btn.className = "tab-btn text-xs font-bold py-2 rounded-xl transition-all text-cyan-200/70 hover:text-white flex flex-col items-center justify-center space-y-1";
+        }
+      });
+    }
+
+    /* ==========================================
+       4. GAME START & TIMER MANAGEMENT
+       ========================================== */
+    function startGame(e) {
+      e.preventDefault();
+      
+      const teamName = document.getElementById('team-name').value.trim();
+      const captainInfo = document.getElementById('captain-info').value.trim();
+      const membersInfo = document.getElementById('members-info').value.trim();
+
+      if (!teamName || !captainInfo) return;
+
+      gameState.teamName = teamName;
+      gameState.captainInfo = captainInfo;
+      gameState.membersInfo = membersInfo;
+      gameState.currentStage = 1;
+      gameState.startTime = Date.now();
+      gameState.unlockedHints = [];
+      gameState.completed = false;
+
+      saveStateToStorage();
+      startTimer();
+      playChime(600, 0.2);
+      updateUI();
+    }
+
+    function startTimer() {
+      if (timerInterval) clearInterval(timerInterval);
+      document.getElementById('header-timer').classList.remove('hidden');
+      
+      timerInterval = setInterval(() => {
+        if (!gameState.startTime || gameState.completed) return;
+        const diffSec = Math.floor((Date.now() - gameState.startTime) / 1000);
+        const hrs = String(Math.floor(diffSec / 3600)).padStart(2, '0');
+        const mins = String(Math.floor((diffSec % 3600) / 60)).padStart(2, '0');
+        const secs = String(diffSec % 60).padStart(2, '0');
+        document.getElementById('header-timer').innerText = `${hrs}:${mins}:${secs}`;
+      }, 1000);
+    }
+
+    /* ==========================================
+       5. UI RENDER ENGINE
+       ========================================== */
+    function updateUI() {
+      const regCard = document.getElementById('registration-card');
+      const gameCard = document.getElementById('active-game-card');
+
+      if (!gameState.startTime) {
+        regCard.classList.remove('hidden');
+        gameCard.classList.add('hidden');
+        return;
+      }
+
+      regCard.classList.add('hidden');
+      gameCard.classList.remove('hidden');
+
+      document.getElementById('display-team-name').innerText = gameState.teamName;
+      document.getElementById('stage-num-text').innerText = gameState.currentStage;
+
+      // Update Penalty Badge
+      const penaltyMins = gameState.unlockedHints.length * 5;
+      const penaltyBadge = document.getElementById('penalty-badge');
+      if (penaltyMins > 0) {
+        penaltyBadge.classList.remove('hidden');
+        document.getElementById('penalty-minutes').innerText = penaltyMins;
+      } else {
+        penaltyBadge.classList.add('hidden');
+      }
+
+      // Render Progress Dots
+      const dotsContainer = document.getElementById('progress-dots');
+      dotsContainer.innerHTML = '';
+      for (let i = 1; i <= 8; i++) {
+        const dot = document.createElement('div');
+        dot.className = `h-2 rounded-full transition-all ${
+          i < gameState.currentStage 
+            ? 'bg-emerald-400' 
+            : i === gameState.currentStage 
+              ? 'bg-cyan-500 ring-2 ring-cyan-300 animate-pulse' 
+              : 'bg-slate-200'
+        }`;
+        dotsContainer.appendChild(dot);
+      }
+
+      // Render Stage Content
+      const stage = STAGES.find(s => s.id === gameState.currentStage) || STAGES[0];
+      document.getElementById('stage-tag').innerText = `STAGE ${stage.id} / 8`;
+      document.getElementById('stage-title').innerText = stage.title;
+      document.getElementById('stage-subtitle').innerText = stage.subtitle;
+      document.getElementById('stage-address').innerText = stage.address;
+      document.getElementById('stage-bg-icon').className = `fa-solid ${stage.icon} text-9xl`;
+      document.getElementById('stage-physical-task').innerText = stage.physicalTask;
+      document.getElementById('stage-puzzle-desc').innerText = stage.puzzleDesc;
+      document.getElementById('puzzle-answer-input').value = '';
+
+      // Render Special Interactive Mini-games inside stages
+      renderInteractiveArea(stage);
+    }
+
+    function renderInteractiveArea(stage) {
+      const container = document.getElementById('puzzle-interactive-area');
+      container.innerHTML = '';
+
+      if (stage.type === 'minigame_sprint') {
+        gameState.sprintDistance = 0;
+        container.innerHTML = `
+          <div class="bg-cyan-900 text-white p-3 rounded-2xl text-center space-y-2">
+            <div class="text-xs text-cyan-200">連續點擊下方划水按鈕衝刺 (目標: 100m)</div>
+            <div class="text-2xl font-black font-mono text-amber-300" id="sprint-meters">0 m</div>
+            <button onclick="swimSprintTap()" class="w-full py-3 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-900 font-extrabold rounded-xl text-sm shadow-md active:scale-95 transition">
+              🏊‍♂️ 划水! 划水! (衝刺)
+            </button>
+          </div>
+        `;
+      } else if (stage.type === 'minigame_color') {
+        container.innerHTML = `
+          <div class="bg-slate-800 p-3 rounded-2xl text-center space-y-2">
+            <div class="text-xs text-slate-300">大浴場彩繪玻璃點擊序列：紅 ➔ 藍 ➔ 綠</div>
+            <div class="flex justify-center space-x-2">
+              <button onclick="clickColorTile('R')" class="w-12 h-12 rounded-xl bg-rose-500 text-white font-bold text-xs active:scale-90">紅</button>
+              <button onclick="clickColorTile('B')" class="w-12 h-12 rounded-xl bg-blue-500 text-white font-bold text-xs active:scale-90">藍</button>
+              <button onclick="clickColorTile('G')" class="w-12 h-12 rounded-xl bg-emerald-500 text-white font-bold text-xs active:scale-90">綠</button>
+            </div>
+            <div id="color-sequence-display" class="text-xs font-mono text-cyan-300 h-4"></div>
+          </div>
+        `;
+      }
+    }
+
+    /* ==========================================
+       6. MINI-GAME LOGIC & ANSWER VALIDATION
+       ========================================== */
+    function swimSprintTap() {
+      gameState.sprintDistance += 5;
+      playChime(300 + gameState.sprintDistance * 5, 0.03);
+      const display = document.getElementById('sprint-meters');
+      if (display) display.innerText = `${gameState.sprintDistance} m`;
+
+      if (gameState.sprintDistance >= 100) {
+        document.getElementById('puzzle-answer-input').value = 'SWIM';
+        submitStageAnswer();
+      }
+    }
+
+    let colorSeq = [];
+    function clickColorTile(color) {
+      colorSeq.push(color);
+      playChime(color === 'R' ? 400 : color === 'B' ? 500 : 600, 0.05);
+      const display = document.getElementById('color-sequence-display');
+      if (display) display.innerText = colorSeq.join(' - ');
+
+      if (colorSeq.join('') === 'RBG') {
+        document.getElementById('puzzle-answer-input').value = 'ROMAN';
+        submitStageAnswer();
+        colorSeq = [];
+      } else if (colorSeq.length >= 3) {
+        colorSeq = [];
+      }
+    }
+
+    function submitStageAnswer() {
+      const input = document.getElementById('puzzle-answer-input').value.trim().toUpperCase();
+      const stage = STAGES.find(s => s.id === gameState.currentStage);
+
+      const isValid = (input === stage.answer.toUpperCase()) || 
+                      (stage.altAnswers && stage.altAnswers.some(a => a.toUpperCase() === input));
+
+      if (isValid) {
+        playChime(800, 0.2);
+        if (gameState.currentStage < 8) {
+          gameState.currentStage++;
+          saveStateToStorage();
+          updateUI();
+        } else {
+          // Finish Game
+          gameState.completed = true;
+          gameState.endTime = Date.now();
+          saveStateToStorage();
+          showVictoryModal();
+        }
+      } else {
+        playChime(150, 0.2);
+        alert('答案不正確，請再試試看或尋找周邊告示牌！');
+      }
+    }
+
+    function skipStageModal() {
+      if (confirm('確定要求助幹部跳過此關嗎？這將增加 10 分鐘罰時。')) {
+        gameState.unlockedHints.push(gameState.currentStage);
+        gameState.unlockedHints.push(gameState.currentStage); // Double penalty
+        if (gameState.currentStage < 8) {
+          gameState.currentStage++;
+          saveStateToStorage();
+          updateUI();
+        } else {
+          showVictoryModal();
+        }
+      }
+    }
+
+    /* ==========================================
+       7. HINT SYSTEM
+       ========================================== */
+    function toggleHintModal() {
+      const modal = document.getElementById('hint-modal');
+      modal.classList.toggle('hidden');
+      
+      const hintContent = document.getElementById('hint-content');
+      const btnUnlock = document.getElementById('btn-unlock-hint');
+      hintContent.classList.add('hidden');
+
+      const isUnlocked = gameState.unlockedHints.includes(gameState.currentStage);
+      if (isUnlocked) {
+        const stage = STAGES.find(s => s.id === gameState.currentStage);
+        hintContent.innerText = stage.hint;
+        hintContent.classList.remove('hidden');
+        btnUnlock.classList.add('hidden');
+      } else {
+        btnUnlock.classList.remove('hidden');
+      }
+    }
+
+    function confirmUnlockHint() {
+      if (!gameState.unlockedHints.includes(gameState.currentStage)) {
+        gameState.unlockedHints.push(gameState.currentStage);
+        saveStateToStorage();
+      }
+      toggleHintModal();
+      updateUI();
+    }
+
+    /* ==========================================
+       8. VICTORY & GOOGLE FORM SUBMISSION
+       ========================================== */
+    function showVictoryModal() {
+      const modal = document.getElementById('victory-modal');
+      modal.classList.remove('hidden');
+
+      const elapsedSec = Math.floor((gameState.endTime - gameState.startTime) / 1000);
+      const penaltyMins = gameState.unlockedHints.length * 5;
+      const finalSec = elapsedSec + (penaltyMins * 60);
+
+      document.getElementById('res-team-name').innerText = gameState.teamName;
+      document.getElementById('res-elapsed-time').innerText = formatTime(elapsedSec);
+      document.getElementById('res-penalty-time').innerText = `+${penaltyMins} 分鐘`;
+      document.getElementById('res-final-time').innerText = formatTime(finalSec);
+
+      saveResultToLeaderboard({
+        teamName: gameState.teamName,
+        timeFormatted: formatTime(finalSec),
+        rawSeconds: finalSec,
+        date: new Date().toLocaleTimeString()
+      });
+    }
+
+    function submitResultsToGoogleForm() {
+      const gUrl = localStorage.getItem('beitou_gform_url');
+      const entryTeam = localStorage.getItem('beitou_gform_entry_team');
+      const entryTime = localStorage.getItem('beitou_gform_entry_time');
+
+      const elapsedSec = Math.floor((gameState.endTime - gameState.startTime) / 1000);
+      const penaltyMins = gameState.unlockedHints.length * 5;
+      const finalTimeStr = formatTime(elapsedSec + (penaltyMins * 60));
+
+      if (gUrl && entryTeam && entryTime) {
+        const formData = new FormData();
+        formData.append(entryTeam, gameState.teamName);
+        formData.append(entryTime, finalTimeStr);
+
+        fetch(gUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          body: formData
+        }).then(() => {
+          alert('成績已成功透過 API 回傳至 Google 表單！');
+        }).catch(() => {
+          alert('發送失敗，請直接告知現場大會幹部成績！');
+        });
+      } else {
+        alert(`[模擬回傳成功]\n隊伍：${gameState.teamName}\n採計時間：${finalTimeStr}\n(幹部可至設定頁面設定 Google Form 網址)`);
+      }
+    }
+
+    /* ==========================================
+       9. MAP & LEADERBOARD RENDERING
+       ========================================== */
+    function renderMapRoute() {
+      const container = document.getElementById('map-route-list');
+      container.innerHTML = '';
+      STAGES.forEach((s, idx) => {
+        const item = document.createElement('div');
+        item.className = "flex items-center space-x-3 p-2 bg-white/80 rounded-xl border border-slate-200/60 shadow-sm";
+        item.innerHTML = `
+          <div class="w-7 h-7 rounded-full bg-cyan-600 text-white flex items-center justify-center font-bold text-xs shrink-0">
+            ${s.id}
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="font-bold text-xs text-slate-800 truncate">${s.title}</div>
+            <div class="text-[10px] text-slate-500 truncate">${s.address}</div>
+          </div>
+          <i class="fa-solid ${s.icon} text-slate-400 text-sm"></i>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function renderLeaderboard() {
+      const container = document.getElementById('leaderboard-list');
+      const data = JSON.parse(localStorage.getItem('beitou_leaderboard') || '[]');
+      container.innerHTML = '';
+
+      if (data.length === 0) {
+        container.innerHTML = '<div class="text-center text-slate-400 py-4">尚無比賽紀錄</div>';
+        return;
+      }
+
+      data.sort((a, b) => a.rawSeconds - b.rawSeconds);
+
+      data.forEach((item, idx) => {
+        const row = document.createElement('div');
+        row.className = "flex justify-between items-center p-2.5 bg-slate-50 rounded-xl border border-slate-200";
+        row.innerHTML = `
+          <div class="flex items-center space-x-2">
+            <span class="font-black text-xs ${idx === 0 ? 'text-amber-500' : idx === 1 ? 'text-slate-400' : 'text-amber-700'}">#${idx + 1}</span>
+            <span class="font-bold text-slate-800">${item.teamName}</span>
+          </div>
+          <span class="font-mono font-bold text-cyan-600 text-xs">${item.timeFormatted}</span>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function saveResultToLeaderboard(record) {
+      const data = JSON.parse(localStorage.getItem('beitou_leaderboard') || '[]');
+      data.push(record);
+      localStorage.setItem('beitou_leaderboard', JSON.stringify(data));
+      renderLeaderboard();
+    }
+
+    function saveGFormConfig() {
+      const url = document.getElementById('gform-url').value.trim();
+      const team = document.getElementById('gform-entry-team').value.trim();
+      const time = document.getElementById('gform-entry-time').value.trim();
+
+      localStorage.setItem('beitou_gform_url', url);
+      localStorage.setItem('beitou_gform_entry_team', team);
+      localStorage.setItem('beitou_gform_entry_time', time);
+      alert('Google Form 設定已儲存！');
+    }
+
+    function exportDataJSON() {
+      const data = localStorage.getItem('beitou_leaderboard') || '[]';
+      const blob = new Blob([data], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `Beitou_Orienteering_Results_${Date.now()}.json`;
+      a.click();
+    }
+
+    /* ==========================================
+       10. UTILITIES & AUDIO
+       ========================================== */
+    function formatTime(totalSeconds) {
+      const hrs = Math.floor(totalSeconds / 3600);
+      const mins = Math.floor((totalSeconds % 3600) / 60);
+      const secs = totalSeconds % 60;
+      return `${hrs > 0 ? hrs + '時' : ''}${mins}分${secs}秒`;
+    }
+
+    function saveStateToStorage() {
+      localStorage.setItem('beitou_game_state', JSON.stringify(gameState));
+    }
+
+    function loadStateFromStorage() {
+      const saved = localStorage.getItem('beitou_game_state');
+      if (saved) {
+        try {
+          gameState = JSON.parse(saved);
+          if (gameState.startTime && !gameState.completed) {
+            startTimer();
+          }
+        } catch(e) {}
+      }
+
+      // Load form config inputs
+      document.getElementById('gform-url').value = localStorage.getItem('beitou_gform_url') || '';
+      document.getElementById('gform-entry-team').value = localStorage.getItem('beitou_gform_entry_team') || '';
+      document.getElementById('gform-entry-time').value = localStorage.getItem('beitou_gform_entry_time') || '';
+    }
+
+    function restartGame() {
+      if (confirm('重設將清除當前隊伍闖關進度，確定嗎？')) {
+        localStorage.removeItem('beitou_game_state');
+        location.reload();
+      }
+    }
+
+    function toggleAudio() {
+      soundEnabled = !soundEnabled;
+      const btn = document.getElementById('audio-toggle-btn');
+      btn.innerHTML = soundEnabled ? '<i class="fa-solid fa-volume-high text-xs"></i>' : '<i class="fa-solid fa-volume-xmark text-xs text-rose-400"></i>';
+    }
+
+    function playChime(freq, duration) {
+      if (!soundEnabled) return;
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch(e) {}
+    }
+  </script>
+</body>
+</html>
